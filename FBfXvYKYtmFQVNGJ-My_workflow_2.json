@@ -1,0 +1,541 @@
+{
+  "name": "My workflow 2",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "4f099873-90d8-46b6-9d87-3aa9f5ef1045",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "14de8ca4-bb6e-4220-97fb-bdaafc3aa979",
+      "name": "Webhook",
+      "webhookId": "4f099873-90d8-46b6-9d87-3aa9f5ef1045"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "gpt-4o"
+        },
+        "responsesApiEnabled": false,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        256,
+        208
+      ],
+      "id": "5c3caf2d-8447-43a6-b72e-6680554e5bcf",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "bYUgYUFpnl62yNMS",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Webhook').item.json.body.transcript }}",
+        "options": {
+          "systemMessage": "=You are an expert sales assistant. When you receive a meeting transcript analyze it and extract:\n\n1. A summary of the meeting in 3 sentences\n2. List of action items with the person responsible\n3. Buying signals detected in the conversation\n4. Next follow up date mentioned\n5. Overall sentiment: positive, neutral, or negative\n\nCalculate a lead score out of 100 based on these rules:\n- Budget mentioned in the meeting: 25 points\n- Strong buying signal detected: 20 points\n- Positive sentiment: 20 points\n- Follow up date agreed: 15 points\n- High engagement level: 10 points\n- Neutral sentiment: 10 points\n- Negative sentiment: 0 points\n\nBased on the total score assign a category:\n- 80 to 100: Hot Lead\n- 50 to 79: Warm Lead\n- Below 50: Cold Lead\n\nYou have access to a HubSpot tool. After analyzing the transcript use it to:\n- Create or update the contact using the client email\n- Save the full meeting summary in the Message field\n- Save the client First Name and Last Name extracted from the transcript\n- If name is not found in transcript, use the part before @ in the email as the first name\n- If the part before @ contains numbers, remove the numbers and save only the letters as the name\n- If only numbers remain after removing, save the name as Unknown\n- Save the lead score and category in the notes field like this: Lead Score: 85/100 - Hot Lead\n- If sentiment is negative add a note saying \"At Risk Client\"\n\nThen write two emails:\n\nSALES REP EMAIL:\nWrite a plain text internal summary email for the sales rep including the meeting summary, action items, buying signals, lead score, lead category and follow up date.\n\nCLIENT EMAIL POSITIVE:\nWrite a warm professional plain text follow up email to the client. Include a short recap, next steps and an excited closing line.\n\nCLIENT EMAIL NEGATIVE:\nWrite an empathetic plain text recovery email to the client. Acknowledge any concerns and rebuild trust professionally.\n\nIMPORTANT RULES:\n- Plain text only\n- No asterisks, no hashtags, no markdown symbols\n- No ** or ## or -- anywhere\n- Keep emails clean and professional\n\nThe client email is: {{ $('Get many events').item.json.attendees[1].email }}\nDo NOT ask for the email. Use this directly.\n\nAlways end with exactly one of these:\nSENTIMENT: Positive\nSENTIMENT: Negative\nSENTIMENT: Neutral\n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        416,
+        16
+      ],
+      "id": "81282914-df8b-4fc3-8af5-18e390d12778",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "webhook-session"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        448,
+        208
+      ],
+      "id": "c684d027-4a93-4661-9e49-dcd98aa41020",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "email": "={{ $('Get many events').first().json.attendees[1].email }}",
+        "additionalFields": {
+          "message": "={{ $fromAI('note', 'Extract the full meeting summary including action items, buying signals, next follow up date and sentiment from the transcript') }}"
+        },
+        "options": {
+          "resolveData": false
+        }
+      },
+      "type": "n8n-nodes-base.hubspotTool",
+      "typeVersion": 2.2,
+      "position": [
+        640,
+        208
+      ],
+      "id": "66b1d394-e59e-4421-ab53-f3fa44358fe7",
+      "name": "Create or update a contact in HubSpot",
+      "credentials": {
+        "hubspotOAuth2Api": {
+          "id": "dKQpsSl7nKiOCJDd",
+          "name": "HubSpot account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "himajakaishetty1@gmail.com",
+        "subject": "Meeting Summary - Action Required",
+        "emailType": "text",
+        "message": "={{ $('AI Agent').item.json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1552,
+        -112
+      ],
+      "id": "d3abe9bd-33e5-4de5-9efe-dca306ae95f9",
+      "name": "Send a message",
+      "webhookId": "d2313ce8-ceca-4caa-b7fd-8b1519bcf8d7",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "1iroArb5xh2ndz4M",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "himajakaishetty1@gmail.com",
+          "mode": "list",
+          "cachedResultName": "himajakaishetty1@gmail.com"
+        },
+        "start": "={{ $now.plus(7, 'days') }}",
+        "end": "={{ $now.plus(7, 'days').plus(1, 'hour') }}",
+        "additionalFields": {
+          "attendees": [
+            "={{ $('Get many events').first().json.attendees[1].email }}"
+          ],
+          "conferenceDataUi": {
+            "conferenceDataValues": {
+              "conferenceSolution": "hangoutsMeet"
+            }
+          },
+          "description": "={{ $('AI Agent').item.json.output }}",
+          "summary": "=Follow up with {{ $('Get many events').first().json.attendees[1].email.split('@')[0] }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        1760,
+        -112
+      ],
+      "id": "c8caedd8-48b6-447e-82ee-79e160608f58",
+      "name": "Create an event",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "wEYBVsACLtIl021R",
+          "name": "Google Calendar OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "7ba49922-64dd-456c-afeb-ceccd3890354",
+              "leftValue": "={{ $('AI Agent').item.json.output.includes('SENTIMENT: Positive') }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1184,
+        16
+      ],
+      "id": "8ab087f8-5c67-46de-a2d2-5d1d46b7a7cd",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Get many events').first().json.attendees[1].email }}",
+        "subject": "Following up on our conversation",
+        "emailType": "text",
+        "message": "={{ $('AI Agent').item.json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1360,
+        112
+      ],
+      "id": "67fdbd3e-4302-4c2e-8262-890735ef957e",
+      "name": "Send a message1",
+      "webhookId": "61c3fa6c-fe42-4967-b6c4-d5c051769e5e",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "1iroArb5xh2ndz4M",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Get many events').first().json.attendees[1].email }}",
+        "subject": "Great connecting with you today!",
+        "emailType": "text",
+        "message": "={{ $('AI Agent').item.json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1344,
+        -112
+      ],
+      "id": "dea273de-eedd-461a-a074-32e2c4e29fe8",
+      "name": "Send a message2",
+      "webhookId": "6aecda0d-3f6e-456a-8519-a85c1cd56552",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "1iroArb5xh2ndz4M",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "himajakaishetty1@gmail.com",
+          "mode": "list",
+          "cachedResultName": "himajakaishetty1@gmail.com"
+        },
+        "limit": 1,
+        "timeMin": "={{ $now.minus({ hours: 2 }) }}",
+        "timeMax": "={{ $now }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        208,
+        0
+      ],
+      "id": "817c24d4-8969-4ff9-a100-ef05027177da",
+      "name": "Get many events",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "wEYBVsACLtIl021R",
+          "name": "Google Calendar OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://api.hunter.io/v2/email-finder?email={{ $('Get many events').first().json.attendees[1].email }}&api_key=a3183dc96780da115f559c7cc70fb2302a97fc31",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        768,
+        16
+      ],
+      "id": "9322fbd6-ee40-44bf-9895-66cffb64802f",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "email": "={{ $('Get many events').first().json.attendees[1].email }}",
+        "additionalFields": {
+          "companyName": "={{ $json.data.organization }}",
+          "jobTitle": "={{ $json.data.position }}",
+          "mobilePhoneNumber": "={{ $json.data.phone_number }}",
+          "streetAddress": "={{ $json.data.location }}"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 2.2,
+      "position": [
+        976,
+        16
+      ],
+      "id": "ab1d924a-849b-4860-a6e1-a6abec92f049",
+      "name": "Create or update a contact",
+      "credentials": {
+        "hubspotOAuth2Api": {
+          "id": "dKQpsSl7nKiOCJDd",
+          "name": "HubSpot account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "himajakaishetty1@gmail.com",
+        "subject": "URGENT: At Risk Client Alert",
+        "emailType": "text",
+        "message": "={{ $('AI Agent').item.json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1568,
+        112
+      ],
+      "id": "206997b7-7861-4084-bec8-810d9b4c85ac",
+      "name": "Send a message3",
+      "webhookId": "7ed222f2-a075-473b-9039-28694da15c38",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "1iroArb5xh2ndz4M",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "himajakaishetty1@gmail.com",
+          "mode": "list",
+          "cachedResultName": "himajakaishetty1@gmail.com"
+        },
+        "start": "={{ $now.plus({ hours: 24 }) }}",
+        "end": "={{ $now.plus({ hours: 25 }) }}",
+        "additionalFields": {
+          "attendees": [
+            "={{ $('Get many events').first().json.attendees[1].email }}"
+          ],
+          "conferenceDataUi": {
+            "conferenceDataValues": {
+              "conferenceSolution": "hangoutsMeet"
+            }
+          },
+          "summary": "=URGENT Follow up with {{ $('Get many events').first().json.attendees[1].email.split('@')[0] }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        1776,
+        112
+      ],
+      "id": "817e0e32-0f40-40d2-9f64-0a0ef912d338",
+      "name": "Create an event1",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "wEYBVsACLtIl021R",
+          "name": "Google Calendar OAuth2 API"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get many events",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create or update a contact in HubSpot": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Create an event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Send a message2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message2": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message1": {
+      "main": [
+        [
+          {
+            "node": "Send a message3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many events": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Create or update a contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create or update a contact": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message3": {
+      "main": [
+        [
+          {
+            "node": "Create an event1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "pinData": {},
+  "triggerCount": 1,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}
