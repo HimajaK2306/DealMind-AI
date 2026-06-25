@@ -4,288 +4,434 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>DealMind AI — Pipeline</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --ink: #18181b;
-    --paper: #fafaf7;
-    --line: #e4e1d8;
-    --accent: #d4541f;
-    --hot: #d4541f;
-    --warm: #c99a3a;
-    --cold: #6b7c93;
-    --risk: #b13434;
-    --muted: #8a8678;
+    --bg: #0a0b0d;
+    --panel: #131519;
+    --panel-2: #16181d;
+    --border: #232630;
+    --border-soft: #1c1e25;
+    --text: #f2f1ed;
+    --text-dim: #9a9ca3;
+    --text-faint: #5d5f68;
+    --hot: #ff6a39;
+    --warm: #ffb648;
+    --cold: #5b9dff;
+    --teal: #4fe8c9;
+    --risk: #ff4d6d;
+    --hot-glow: rgba(255, 106, 57, 0.18);
+    --teal-glow: rgba(79, 232, 201, 0.14);
   }
 
   * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
 
   body {
-    margin: 0;
-    background: var(--paper);
-    color: var(--ink);
-    font-family: 'IBM Plex Mono', 'Courier New', monospace;
+    background: var(--bg);
+    background-image:
+      radial-gradient(ellipse 900px 500px at 15% -10%, rgba(255,106,57,0.07), transparent),
+      radial-gradient(ellipse 700px 500px at 100% 0%, rgba(79,232,201,0.06), transparent);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
     -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
   }
 
-  @font-face {
-    font-family: 'Fraunces';
-    src: local('Georgia');
-  }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+  .display { font-family: 'Space Grotesk', sans-serif; }
 
-  .display {
-    font-family: Georgia, 'Times New Roman', serif;
-  }
-
-  /* ---------- Login screen ---------- */
+  /* ---------- Login ---------- */
   #loginScreen {
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    flex-direction: column;
-    gap: 20px;
     padding: 24px;
   }
 
   .login-card {
     width: 100%;
-    max-width: 360px;
-    border: 1px solid var(--line);
-    padding: 40px 32px;
-    background: white;
+    max-width: 380px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 36px 32px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .login-card::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 160px; height: 160px;
+    background: radial-gradient(circle, var(--hot-glow), transparent 70%);
+    pointer-events: none;
+  }
+
+  .login-pulse {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--teal);
+    box-shadow: 0 0 0 0 rgba(79,232,201,0.6);
+    animation: pulse 2s infinite;
+    display: inline-block;
+    margin-right: 8px;
+  }
+
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(79,232,201,0.5); }
+    70% { box-shadow: 0 0 0 8px rgba(79,232,201,0); }
+    100% { box-shadow: 0 0 0 0 rgba(79,232,201,0); }
   }
 
   .login-mark {
-    font-size: 13px;
+    display: flex; align-items: center;
+    font-size: 12px;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 8px;
+    color: var(--text-dim);
+    margin-bottom: 18px;
   }
 
   .login-title {
-    font-family: Georgia, serif;
-    font-size: 28px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 26px;
+    font-weight: 600;
+    margin: 0 0 6px 0;
+    letter-spacing: -0.01em;
+  }
+  .login-sub {
+    font-size: 13px;
+    color: var(--text-faint);
     margin: 0 0 28px 0;
-    font-style: italic;
   }
 
   #passwordInput {
     width: 100%;
-    padding: 12px 14px;
-    border: 1px solid var(--line);
-    background: var(--paper);
+    padding: 13px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--bg);
     font-family: inherit;
-    font-size: 15px;
-    color: var(--ink);
-    margin-bottom: 14px;
+    font-size: 14px;
+    color: var(--text);
+    margin-bottom: 12px;
   }
+  #passwordInput::placeholder { color: var(--text-faint); }
   #passwordInput:focus {
-    outline: 2px solid var(--accent);
-    outline-offset: 1px;
+    outline: none;
+    border-color: var(--teal);
+    box-shadow: 0 0 0 3px var(--teal-glow);
   }
 
   #loginBtn {
     width: 100%;
-    padding: 12px 14px;
-    background: var(--ink);
-    color: var(--paper);
+    padding: 13px 14px;
+    background: var(--text);
+    color: var(--bg);
     border: none;
+    border-radius: 10px;
     font-family: inherit;
+    font-weight: 600;
     font-size: 14px;
-    letter-spacing: 0.04em;
     cursor: pointer;
-    text-transform: uppercase;
+    transition: opacity 0.15s;
   }
-  #loginBtn:hover { background: var(--accent); }
-  #loginBtn:disabled { opacity: 0.5; cursor: wait; }
+  #loginBtn:hover { opacity: 0.85; }
+  #loginBtn:disabled { opacity: 0.4; cursor: wait; }
 
   #loginError {
     color: var(--risk);
     font-size: 13px;
-    margin-top: 10px;
-    min-height: 18px;
+    margin-top: 12px;
+    min-height: 16px;
   }
 
   /* ---------- Dashboard shell ---------- */
   #dashboard { display: none; }
 
   header.top {
-    border-bottom: 1px solid var(--line);
-    padding: 28px 40px 24px;
+    border-bottom: 1px solid var(--border-soft);
+    padding: 24px 40px;
     display: flex;
     justify-content: space-between;
-    align-items: baseline;
+    align-items: center;
     flex-wrap: wrap;
-    gap: 12px;
+    gap: 14px;
+    position: sticky;
+    top: 0;
+    background: rgba(10,11,13,0.85);
+    backdrop-filter: blur(10px);
+    z-index: 10;
   }
 
-  .brand-eyebrow {
-    font-size: 12px;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--muted);
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .brand-icon {
+    width: 30px; height: 30px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--hot), #c2410c);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    color: #0a0b0d;
+    flex-shrink: 0;
   }
 
   .brand-title {
-    font-family: Georgia, serif;
-    font-size: 32px;
-    font-style: italic;
-    margin: 2px 0 0 0;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .brand-title span { color: var(--text-dim); font-weight: 500; }
+
+  .live-status {
+    display: flex; align-items: center;
+    gap: 7px;
+    font-size: 12px;
+    color: var(--text-faint);
+  }
+
+  .live-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--teal);
+    animation: pulse 2s infinite;
   }
 
   .refresh-row {
     display: flex;
     align-items: center;
-    gap: 14px;
-    font-size: 12px;
-    color: var(--muted);
+    gap: 16px;
   }
 
   #refreshBtn {
-    border: 1px solid var(--ink);
-    background: transparent;
-    padding: 8px 16px;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: var(--text);
+    padding: 9px 18px;
+    border-radius: 9px;
     font-family: inherit;
-    font-size: 12px;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
+    font-size: 13px;
+    font-weight: 500;
     cursor: pointer;
-    color: var(--ink);
+    transition: border-color 0.15s, background 0.15s;
   }
-  #refreshBtn:hover { background: var(--ink); color: var(--paper); }
+  #refreshBtn:hover { border-color: var(--teal); background: var(--panel-2); }
 
   main {
-    max-width: 1180px;
+    max-width: 1240px;
     margin: 0 auto;
-    padding: 36px 40px 80px;
+    padding: 40px 40px 100px;
   }
 
   /* ---------- Overview cards ---------- */
   .overview {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 1px;
-    background: var(--line);
-    border: 1px solid var(--line);
+    gap: 14px;
     margin-bottom: 48px;
   }
 
   .stat-card {
-    background: var(--paper);
-    padding: 28px 24px;
+    background: var(--panel);
+    border: 1px solid var(--border-soft);
+    border-radius: 14px;
+    padding: 22px 22px 20px;
     position: relative;
+    overflow: hidden;
   }
 
-  .stat-number {
-    font-family: Georgia, serif;
-    font-size: 44px;
-    line-height: 1;
-    margin: 0 0 8px 0;
+  .stat-card .glow {
+    position: absolute;
+    width: 100px; height: 100px;
+    border-radius: 50%;
+    top: -30px; right: -30px;
+    filter: blur(10px);
+    opacity: 0.5;
+  }
+
+  .stat-top {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    margin-bottom: 18px;
   }
 
   .stat-label {
     font-size: 12px;
-    letter-spacing: 0.08em;
+    font-weight: 500;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
-    color: var(--muted);
+    color: var(--text-dim);
   }
 
-  .stat-card.hot .stat-number { color: var(--hot); }
-  .stat-card.warm .stat-number { color: var(--warm); }
-  .stat-card.cold .stat-number { color: var(--cold); }
+  .stat-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+  }
 
-  /* ---------- Table section ---------- */
-  .section-eyebrow {
-    font-size: 12px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 6px;
+  .stat-number {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 38px;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+
+  .stat-card.total .stat-dot { background: var(--text-dim); }
+  .stat-card.hot .stat-dot { background: var(--hot); }
+  .stat-card.hot .glow { background: var(--hot); }
+  .stat-card.warm .stat-dot { background: var(--warm); }
+  .stat-card.warm .glow { background: var(--warm); }
+  .stat-card.cold .stat-dot { background: var(--cold); }
+  .stat-card.cold .glow { background: var(--cold); }
+
+  /* ---------- Section header ---------- */
+  .section-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 22px;
+    flex-wrap: wrap;
+    gap: 10px;
   }
 
   .section-title {
-    font-family: Georgia, serif;
-    font-size: 22px;
-    font-style: italic;
-    margin: 0 0 24px 0;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 19px;
+    font-weight: 600;
   }
 
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 14px;
+  .section-count {
+    font-size: 13px;
+    color: var(--text-faint);
   }
+
+  /* ---------- Table ---------- */
+  .table-card {
+    background: var(--panel);
+    border: 1px solid var(--border-soft);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+
+  table { width: 100%; border-collapse: collapse; }
 
   thead th {
     text-align: left;
     font-size: 11px;
-    letter-spacing: 0.08em;
+    font-weight: 600;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: var(--muted);
-    font-weight: 400;
-    padding: 0 16px 12px 0;
-    border-bottom: 1px solid var(--ink);
+    color: var(--text-faint);
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-soft);
+    background: var(--panel-2);
   }
 
   tbody td {
-    padding: 16px 16px 16px 0;
-    border-bottom: 1px solid var(--line);
-    vertical-align: top;
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--border-soft);
+    vertical-align: middle;
   }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr { transition: background 0.12s; }
+  tbody tr:hover { background: rgba(255,255,255,0.02); }
 
-  tbody tr:hover { background: rgba(212, 84, 31, 0.04); }
+  .name-cell { font-weight: 600; font-size: 14px; }
+  .email-cell { color: var(--text-faint); font-size: 12.5px; margin-top: 2px; }
 
-  .name-cell { font-weight: 600; }
-  .email-cell { color: var(--muted); font-size: 13px; }
+  .score-wrap { display: flex; align-items: center; gap: 10px; min-width: 130px; }
+  .score-bar-bg {
+    flex: 1;
+    height: 5px;
+    border-radius: 3px;
+    background: var(--border-soft);
+    overflow: hidden;
+  }
+  .score-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .score-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    width: 30px;
+    text-align: right;
+    color: var(--text-dim);
+  }
 
   .badge {
-    display: inline-block;
-    padding: 3px 10px;
-    font-size: 11px;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    border: 1px solid currentColor;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 11px;
+    border-radius: 20px;
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
   }
-  .badge.hot { color: var(--hot); }
-  .badge.warm { color: var(--warm); }
-  .badge.cold { color: var(--cold); }
-  .badge.unknown { color: var(--muted); }
+  .badge .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .badge.hot { background: var(--hot-glow); color: var(--hot); }
+  .badge.hot .dot { background: var(--hot); }
+  .badge.warm { background: rgba(255,182,72,0.14); color: var(--warm); }
+  .badge.warm .dot { background: var(--warm); }
+  .badge.cold { background: rgba(91,157,255,0.12); color: var(--cold); }
+  .badge.cold .dot { background: var(--cold); }
+  .badge.unknown { background: rgba(255,255,255,0.05); color: var(--text-faint); }
+  .badge.unknown .dot { background: var(--text-faint); }
 
   .risk-flag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 6px;
     color: var(--risk);
-    font-size: 12px;
+    font-size: 11.5px;
     font-weight: 600;
   }
 
-  .score-num { font-family: Georgia, serif; font-size: 18px; }
+  .company-cell { font-size: 13.5px; color: var(--text-dim); }
+  .company-cell .title { color: var(--text-faint); }
 
-  .empty-state {
+  /* ---------- States ---------- */
+  #loadingState, .empty-state {
     text-align: center;
-    padding: 80px 20px;
-    color: var(--muted);
+    padding: 90px 20px;
+    color: var(--text-faint);
   }
   .empty-state .display {
-    font-style: italic;
-    font-size: 20px;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text);
     margin-bottom: 8px;
-    color: var(--ink);
   }
 
-  #loadingState {
-    text-align: center;
-    padding: 80px 20px;
-    color: var(--muted);
-    font-size: 14px;
-    letter-spacing: 0.05em;
+  .loader-ring {
+    width: 22px; height: 22px;
+    border: 2px solid var(--border);
+    border-top-color: var(--teal);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin: 0 auto 16px;
   }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
-  @media (max-width: 800px) {
+  @media (max-width: 820px) {
     .overview { grid-template-columns: repeat(2, 1fr); }
-    header.top { padding: 20px; }
-    main { padding: 24px 20px 60px; }
-    table { font-size: 12px; }
-    thead th:nth-child(4), tbody td:nth-child(4) { display: none; }
+    header.top { padding: 18px 20px; }
+    main { padding: 28px 20px 70px; }
+    thead th:nth-child(2), tbody td:nth-child(2) { display: none; }
   }
 </style>
 </head>
@@ -294,10 +440,11 @@
   <!-- LOGIN SCREEN -->
   <div id="loginScreen">
     <div class="login-card">
-      <div class="login-mark">DealMind AI</div>
-      <h1 class="login-title">Pipeline</h1>
-      <input type="password" id="passwordInput" placeholder="Enter password" autocomplete="current-password" />
-      <button id="loginBtn">Enter</button>
+      <div class="login-mark"><span class="login-pulse"></span>DEALMIND AI</div>
+      <h1 class="login-title">Pipeline access</h1>
+      <p class="login-sub">Enter your password to view live pipeline data.</p>
+      <input type="password" id="passwordInput" placeholder="Password" autocomplete="current-password" />
+      <button id="loginBtn">Unlock dashboard</button>
       <div id="loginError"></div>
     </div>
   </div>
@@ -305,63 +452,71 @@
   <!-- DASHBOARD -->
   <div id="dashboard">
     <header class="top">
-      <div>
-        <div class="brand-eyebrow">DealMind AI</div>
-        <h1 class="brand-title">Pipeline</h1>
+      <div class="brand">
+        <div class="brand-icon">D</div>
+        <div class="brand-title">DealMind <span>Pipeline</span></div>
       </div>
       <div class="refresh-row">
-        <span id="lastUpdated"></span>
+        <div class="live-status"><span class="live-dot"></span><span id="lastUpdated">Live</span></div>
         <button id="refreshBtn">Refresh</button>
       </div>
     </header>
 
     <main>
-      <div class="overview" id="overviewCards">
-        <div class="stat-card">
-          <p class="stat-number" id="totalCount">—</p>
-          <p class="stat-label">Total Leads</p>
+      <div class="overview">
+        <div class="stat-card total">
+          <div class="stat-top"><span class="stat-label">Total leads</span><span class="stat-dot"></span></div>
+          <div class="stat-number" id="totalCount">—</div>
         </div>
         <div class="stat-card hot">
-          <p class="stat-number" id="hotCount">—</p>
-          <p class="stat-label">Hot</p>
+          <div class="glow"></div>
+          <div class="stat-top"><span class="stat-label">Hot</span><span class="stat-dot"></span></div>
+          <div class="stat-number" id="hotCount">—</div>
         </div>
         <div class="stat-card warm">
-          <p class="stat-number" id="warmCount">—</p>
-          <p class="stat-label">Warm</p>
+          <div class="glow"></div>
+          <div class="stat-top"><span class="stat-label">Warm</span><span class="stat-dot"></span></div>
+          <div class="stat-number" id="warmCount">—</div>
         </div>
         <div class="stat-card cold">
-          <p class="stat-number" id="coldCount">—</p>
-          <p class="stat-label">Cold</p>
+          <div class="glow"></div>
+          <div class="stat-top"><span class="stat-label">Cold</span><span class="stat-dot"></span></div>
+          <div class="stat-number" id="coldCount">—</div>
         </div>
       </div>
 
-      <div class="section-eyebrow">Every Contact</div>
-      <h2 class="section-title">The full ledger</h2>
-
-      <div id="loadingState">Loading contacts from HubSpot…</div>
-      <div id="tableWrap" style="display:none;">
-        <table>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Company / Title</th>
-              <th>Score</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody id="contactsBody"></tbody>
-        </table>
+      <div class="section-head">
+        <div class="section-title">All contacts</div>
+        <div class="section-count" id="contactCountLabel"></div>
       </div>
-      <div class="empty-state" id="emptyState" style="display:none;">
-        <p class="display">No contacts yet</p>
-        <p>Run a meeting through DealMind AI and it'll show up here.</p>
+
+      <div class="table-card">
+        <div id="loadingState">
+          <div class="loader-ring"></div>
+          Pulling contacts from HubSpot…
+        </div>
+        <div id="tableWrap" style="display:none;">
+          <table>
+            <thead>
+              <tr>
+                <th>Contact</th>
+                <th>Company / Role</th>
+                <th>Lead score</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="contactsBody"></tbody>
+          </table>
+        </div>
+        <div class="empty-state" id="emptyState" style="display:none;">
+          <p class="display">No contacts yet</p>
+          <p>Run a meeting through DealMind AI and it'll show up here.</p>
+        </div>
       </div>
     </main>
   </div>
 
 <script>
-  // ---- CONFIG ----
-  // Replace this with your actual Render backend URL once deployed.
   const BACKEND_URL = "https://dealmind-backend.onrender.com";
 
   let dashboardPassword = "";
@@ -416,6 +571,13 @@
     return 'unknown';
   }
 
+  function scoreColor(score) {
+    if (score === null || score === undefined) return 'var(--text-faint)';
+    if (score >= 80) return 'var(--hot)';
+    if (score >= 50) return 'var(--warm)';
+    return 'var(--cold)';
+  }
+
   async function loadContacts() {
     document.getElementById('loadingState').style.display = 'block';
     document.getElementById('tableWrap').style.display = 'none';
@@ -428,8 +590,8 @@
       const data = await res.json();
 
       if (!res.ok) {
-        document.getElementById('loadingState').textContent =
-          'Error loading contacts: ' + (data.error || 'unknown error');
+        document.getElementById('loadingState').innerHTML =
+          'Error loading contacts: ' + escapeHtml(data.error || 'unknown error');
         return;
       }
 
@@ -440,6 +602,8 @@
       document.getElementById('loadingState').style.display = 'none';
       document.getElementById('lastUpdated').textContent =
         'Updated ' + new Date().toLocaleTimeString();
+      document.getElementById('contactCountLabel').textContent =
+        contacts.length + (contacts.length === 1 ? ' contact' : ' contacts');
 
       if (contacts.length === 0) {
         document.getElementById('emptyState').style.display = 'block';
@@ -447,7 +611,7 @@
         document.getElementById('tableWrap').style.display = 'block';
       }
     } catch (err) {
-      document.getElementById('loadingState').textContent =
+      document.getElementById('loadingState').innerHTML =
         "Couldn't reach the backend. Is it running?";
     }
   }
@@ -469,10 +633,13 @@
     const body = document.getElementById('contactsBody');
     body.innerHTML = sorted.map(c => {
       const fullName = `${c.firstName || ''} ${c.lastName || ''}`.trim() || '(no name)';
-      const companyLine = [c.company, c.jobTitle].filter(Boolean).join(' · ') || '—';
-      const score = c.leadScore !== null && c.leadScore !== undefined ? c.leadScore : '—';
+      const companyLine = c.company || '—';
+      const titleLine = c.jobTitle || '';
+      const score = c.leadScore !== null && c.leadScore !== undefined ? c.leadScore : null;
+      const scorePct = score !== null ? Math.min(100, Math.max(0, score)) : 0;
       const catClass = categoryClass(c.leadCategory);
       const catLabel = c.leadCategory || 'Unscored';
+      const color = scoreColor(score);
 
       return `
         <tr>
@@ -480,11 +647,21 @@
             <div class="name-cell">${escapeHtml(fullName)}</div>
             <div class="email-cell">${escapeHtml(c.email || '')}</div>
           </td>
-          <td>${escapeHtml(companyLine)}</td>
-          <td><span class="score-num">${score}</span></td>
           <td>
-            <span class="badge ${catClass}">${escapeHtml(catLabel)}</span>
-            ${c.atRisk ? '<div class="risk-flag">⚠ At Risk</div>' : ''}
+            <div class="company-cell">${escapeHtml(companyLine)}</div>
+            <div class="company-cell title">${escapeHtml(titleLine)}</div>
+          </td>
+          <td>
+            <div class="score-wrap">
+              <div class="score-bar-bg">
+                <div class="score-bar-fill" style="width:${scorePct}%; background:${color};"></div>
+              </div>
+              <div class="score-text">${score !== null ? score : '—'}</div>
+            </div>
+          </td>
+          <td>
+            <span class="badge ${catClass}"><span class="dot"></span>${escapeHtml(catLabel)}</span>
+            ${c.atRisk ? '<div class="risk-flag">⚠ At risk</div>' : ''}
           </td>
         </tr>
       `;
