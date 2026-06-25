@@ -1,0 +1,18 @@
+{
+  "name": "dealmind-dashboard-backend",
+  "version": "1.0.0",
+  "description": "Backend API for DealMind AI dashboard - securely fetches HubSpot data",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "cors": "^2.8.5",
+    "node-fetch": "^2.7.0",
+    "dotenv": "^16.4.5"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
