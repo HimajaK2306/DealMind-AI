@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>DealMind AI — Pipeline</title>
+<style>
+  :root {
+    --ink: #18181b;
+    --paper: #fafaf7;
+    --line: #e4e1d8;
+    --accent: #d4541f;
+    --hot: #d4541f;
+    --warm: #c99a3a;
+    --cold: #6b7c93;
+    --risk: #b13434;
+    --muted: #8a8678;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'IBM Plex Mono', 'Courier New', monospace;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  @font-face {
+    font-family: 'Fraunces';
+    src: local('Georgia');
+  }
+
+  .display {
+    font-family: Georgia, 'Times New Roman', serif;
+  }
+
+  /* ---------- Login screen ---------- */
+  #loginScreen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 20px;
+    padding: 24px;
+  }
+
+  .login-card {
+    width: 100%;
+    max-width: 360px;
+    border: 1px solid var(--line);
+    padding: 40px 32px;
+    background: white;
+  }
+
+  .login-mark {
+    font-size: 13px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .login-title {
+    font-family: Georgia, serif;
+    font-size: 28px;
+    margin: 0 0 28px 0;
+    font-style: italic;
+  }
+
+  #passwordInput {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    background: var(--paper);
+    font-family: inherit;
+    font-size: 15px;
+    color: var(--ink);
+    margin-bottom: 14px;
+  }
+  #passwordInput:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+
+  #loginBtn {
+    width: 100%;
+    padding: 12px 14px;
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    font-family: inherit;
+    font-size: 14px;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    text-transform: uppercase;
+  }
+  #loginBtn:hover { background: var(--accent); }
+  #loginBtn:disabled { opacity: 0.5; cursor: wait; }
+
+  #loginError {
+    color: var(--risk);
+    font-size: 13px;
+    margin-top: 10px;
+    min-height: 18px;
+  }
+
+  /* ---------- Dashboard shell ---------- */
+  #dashboard { display: none; }
+
+  header.top {
+    border-bottom: 1px solid var(--line);
+    padding: 28px 40px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .brand-eyebrow {
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .brand-title {
+    font-family: Georgia, serif;
+    font-size: 32px;
+    font-style: italic;
+    margin: 2px 0 0 0;
+  }
+
+  .refresh-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  #refreshBtn {
+    border: 1px solid var(--ink);
+    background: transparent;
+    padding: 8px 16px;
+    font-family: inherit;
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    cursor: pointer;
+    color: var(--ink);
+  }
+  #refreshBtn:hover { background: var(--ink); color: var(--paper); }
+
+  main {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 36px 40px 80px;
+  }
+
+  /* ---------- Overview cards ---------- */
+  .overview {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    margin-bottom: 48px;
+  }
+
+  .stat-card {
+    background: var(--paper);
+    padding: 28px 24px;
+    position: relative;
+  }
+
+  .stat-number {
+    font-family: Georgia, serif;
+    font-size: 44px;
+    line-height: 1;
+    margin: 0 0 8px 0;
+  }
+
+  .stat-label {
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .stat-card.hot .stat-number { color: var(--hot); }
+  .stat-card.warm .stat-number { color: var(--warm); }
+  .stat-card.cold .stat-number { color: var(--cold); }
+
+  /* ---------- Table section ---------- */
+  .section-eyebrow {
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  .section-title {
+    font-family: Georgia, serif;
+    font-size: 22px;
+    font-style: italic;
+    margin: 0 0 24px 0;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+
+  thead th {
+    text-align: left;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 400;
+    padding: 0 16px 12px 0;
+    border-bottom: 1px solid var(--ink);
+  }
+
+  tbody td {
+    padding: 16px 16px 16px 0;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+  }
+
+  tbody tr:hover { background: rgba(212, 84, 31, 0.04); }
+
+  .name-cell { font-weight: 600; }
+  .email-cell { color: var(--muted); font-size: 13px; }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border: 1px solid currentColor;
+  }
+  .badge.hot { color: var(--hot); }
+  .badge.warm { color: var(--warm); }
+  .badge.cold { color: var(--cold); }
+  .badge.unknown { color: var(--muted); }
+
+  .risk-flag {
+    color: var(--risk);
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .score-num { font-family: Georgia, serif; font-size: 18px; }
+
+  .empty-state {
+    text-align: center;
+    padding: 80px 20px;
+    color: var(--muted);
+  }
+  .empty-state .display {
+    font-style: italic;
+    font-size: 20px;
+    margin-bottom: 8px;
+    color: var(--ink);
+  }
+
+  #loadingState {
+    text-align: center;
+    padding: 80px 20px;
+    color: var(--muted);
+    font-size: 14px;
+    letter-spacing: 0.05em;
+  }
+
+  @media (max-width: 800px) {
+    .overview { grid-template-columns: repeat(2, 1fr); }
+    header.top { padding: 20px; }
+    main { padding: 24px 20px 60px; }
+    table { font-size: 12px; }
+    thead th:nth-child(4), tbody td:nth-child(4) { display: none; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- LOGIN SCREEN -->
+  <div id="loginScreen">
+    <div class="login-card">
+      <div class="login-mark">DealMind AI</div>
+      <h1 class="login-title">Pipeline</h1>
+      <input type="password" id="passwordInput" placeholder="Enter password" autocomplete="current-password" />
+      <button id="loginBtn">Enter</button>
+      <div id="loginError"></div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="dashboard">
+    <header class="top">
+      <div>
+        <div class="brand-eyebrow">DealMind AI</div>
+        <h1 class="brand-title">Pipeline</h1>
+      </div>
+      <div class="refresh-row">
+        <span id="lastUpdated"></span>
+        <button id="refreshBtn">Refresh</button>
+      </div>
+    </header>
+
+    <main>
+      <div class="overview" id="overviewCards">
+        <div class="stat-card">
+          <p class="stat-number" id="totalCount">—</p>
+          <p class="stat-label">Total Leads</p>
+        </div>
+        <div class="stat-card hot">
+          <p class="stat-number" id="hotCount">—</p>
+          <p class="stat-label">Hot</p>
+        </div>
+        <div class="stat-card warm">
+          <p class="stat-number" id="warmCount">—</p>
+          <p class="stat-label">Warm</p>
+        </div>
+        <div class="stat-card cold">
+          <p class="stat-number" id="coldCount">—</p>
+          <p class="stat-label">Cold</p>
+        </div>
+      </div>
+
+      <div class="section-eyebrow">Every Contact</div>
+      <h2 class="section-title">The full ledger</h2>
+
+      <div id="loadingState">Loading contacts from HubSpot…</div>
+      <div id="tableWrap" style="display:none;">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Company / Title</th>
+              <th>Score</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="contactsBody"></tbody>
+        </table>
+      </div>
+      <div class="empty-state" id="emptyState" style="display:none;">
+        <p class="display">No contacts yet</p>
+        <p>Run a meeting through DealMind AI and it'll show up here.</p>
+      </div>
+    </main>
+  </div>
+
+<script>
+  // ---- CONFIG ----
+  // Replace this with your actual Render backend URL once deployed.
+  const BACKEND_URL = "https://dealmind-backend.onrender.com";
+
+  let dashboardPassword = "";
+
+  const loginScreen = document.getElementById('loginScreen');
+  const dashboard = document.getElementById('dashboard');
+  const passwordInput = document.getElementById('passwordInput');
+  const loginBtn = document.getElementById('loginBtn');
+  const loginError = document.getElementById('loginError');
+
+  async function login() {
+    const pw = passwordInput.value.trim();
+    if (!pw) return;
+    loginBtn.disabled = true;
+    loginError.textContent = "";
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: pw })
+      });
+      const data = await res.json();
+      if (data.success) {
+        dashboardPassword = pw;
+        loginScreen.style.display = 'none';
+        dashboard.style.display = 'block';
+        loadContacts();
+      } else {
+        loginError.textContent = "Incorrect password. Try again.";
+      }
+    } catch (err) {
+      loginError.textContent = "Couldn't reach the server. Check the backend is running.";
+    } finally {
+      loginBtn.disabled = false;
+    }
+  }
+
+  loginBtn.addEventListener('click', login);
+  passwordInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') login(); });
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function categoryClass(cat) {
+    if (!cat) return 'unknown';
+    const c = cat.toLowerCase();
+    if (c === 'hot') return 'hot';
+    if (c === 'warm') return 'warm';
+    if (c === 'cold') return 'cold';
+    return 'unknown';
+  }
+
+  async function loadContacts() {
+    document.getElementById('loadingState').style.display = 'block';
+    document.getElementById('tableWrap').style.display = 'none';
+    document.getElementById('emptyState').style.display = 'none';
+
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/contacts`, {
+        headers: { 'x-dashboard-password': dashboardPassword }
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        document.getElementById('loadingState').textContent =
+          'Error loading contacts: ' + (data.error || 'unknown error');
+        return;
+      }
+
+      const contacts = data.contacts || [];
+      renderOverview(contacts);
+      renderTable(contacts);
+
+      document.getElementById('loadingState').style.display = 'none';
+      document.getElementById('lastUpdated').textContent =
+        'Updated ' + new Date().toLocaleTimeString();
+
+      if (contacts.length === 0) {
+        document.getElementById('emptyState').style.display = 'block';
+      } else {
+        document.getElementById('tableWrap').style.display = 'block';
+      }
+    } catch (err) {
+      document.getElementById('loadingState').textContent =
+        "Couldn't reach the backend. Is it running?";
+    }
+  }
+
+  function renderOverview(contacts) {
+    const total = contacts.length;
+    const hot = contacts.filter(c => (c.leadCategory || '').toLowerCase() === 'hot').length;
+    const warm = contacts.filter(c => (c.leadCategory || '').toLowerCase() === 'warm').length;
+    const cold = contacts.filter(c => (c.leadCategory || '').toLowerCase() === 'cold').length;
+
+    document.getElementById('totalCount').textContent = total;
+    document.getElementById('hotCount').textContent = hot;
+    document.getElementById('warmCount').textContent = warm;
+    document.getElementById('coldCount').textContent = cold;
+  }
+
+  function renderTable(contacts) {
+    const sorted = [...contacts].sort((a, b) => (b.leadScore || 0) - (a.leadScore || 0));
+    const body = document.getElementById('contactsBody');
+    body.innerHTML = sorted.map(c => {
+      const fullName = `${c.firstName || ''} ${c.lastName || ''}`.trim() || '(no name)';
+      const companyLine = [c.company, c.jobTitle].filter(Boolean).join(' · ') || '—';
+      const score = c.leadScore !== null && c.leadScore !== undefined ? c.leadScore : '—';
+      const catClass = categoryClass(c.leadCategory);
+      const catLabel = c.leadCategory || 'Unscored';
+
+      return `
+        <tr>
+          <td>
+            <div class="name-cell">${escapeHtml(fullName)}</div>
+            <div class="email-cell">${escapeHtml(c.email || '')}</div>
+          </td>
+          <td>${escapeHtml(companyLine)}</td>
+          <td><span class="score-num">${score}</span></td>
+          <td>
+            <span class="badge ${catClass}">${escapeHtml(catLabel)}</span>
+            ${c.atRisk ? '<div class="risk-flag">⚠ At Risk</div>' : ''}
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  document.getElementById('refreshBtn').addEventListener('click', loadContacts);
+</script>
+</body>
+</html>
