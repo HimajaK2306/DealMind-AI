@@ -343,8 +343,16 @@
     vertical-align: middle;
   }
   tbody tr:last-child td { border-bottom: none; }
-  tbody tr { transition: background 0.12s; }
-  tbody tr:hover { background: rgba(255,255,255,0.02); }
+  tbody tr { transition: background 0.12s; cursor: pointer; }
+  tbody tr:hover { background: rgba(255,255,255,0.035); }
+  tbody tr:hover .name-cell { color: var(--teal); }
+
+  .row-arrow {
+    color: var(--text-faint);
+    font-size: 16px;
+    transition: color 0.12s, transform 0.12s;
+  }
+  tbody tr:hover .row-arrow { color: var(--teal); transform: translateX(2px); }
 
   .name-cell { font-weight: 600; font-size: 14px; }
   .email-cell { color: var(--text-faint); font-size: 12.5px; margin-top: 2px; }
@@ -503,6 +511,7 @@
                 <th>Company / Role</th>
                 <th>Lead score</th>
                 <th>Status</th>
+                <th></th>
               </tr>
             </thead>
             <tbody id="contactsBody"></tbody>
@@ -541,6 +550,7 @@
       const data = await res.json();
       if (data.success) {
         dashboardPassword = pw;
+        sessionStorage.setItem('dealmind_pw', pw);
         loginScreen.style.display = 'none';
         dashboard.style.display = 'block';
         loadContacts();
@@ -642,7 +652,7 @@
       const color = scoreColor(score);
 
       return `
-        <tr>
+        <tr onclick="window.location.href='contact.html?id=${encodeURIComponent(c.id)}'">
           <td>
             <div class="name-cell">${escapeHtml(fullName)}</div>
             <div class="email-cell">${escapeHtml(c.email || '')}</div>
@@ -663,6 +673,7 @@
             <span class="badge ${catClass}"><span class="dot"></span>${escapeHtml(catLabel)}</span>
             ${c.atRisk ? '<div class="risk-flag">⚠ At risk</div>' : ''}
           </td>
+          <td><span class="row-arrow">→</span></td>
         </tr>
       `;
     }).join('');
