@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>DealMind AI — Contact</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0b0d;
+    --panel: #131519;
+    --panel-2: #16181d;
+    --border: #232630;
+    --border-soft: #1c1e25;
+    --text: #f2f1ed;
+    --text-dim: #9a9ca3;
+    --text-faint: #5d5f68;
+    --hot: #ff6a39;
+    --warm: #ffb648;
+    --cold: #5b9dff;
+    --teal: #4fe8c9;
+    --risk: #ff4d6d;
+    --hot-glow: rgba(255, 106, 57, 0.18);
+    --teal-glow: rgba(79, 232, 201, 0.14);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    background-image:
+      radial-gradient(ellipse 900px 500px at 15% -10%, rgba(255,106,57,0.07), transparent),
+      radial-gradient(ellipse 700px 500px at 100% 0%, rgba(79,232,201,0.06), transparent);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+
+  .display { font-family: 'Space Grotesk', sans-serif; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(79,232,201,0.5); }
+    70% { box-shadow: 0 0 0 8px rgba(79,232,201,0); }
+    100% { box-shadow: 0 0 0 0 rgba(79,232,201,0); }
+  }
+
+  header.top {
+    border-bottom: 1px solid var(--border-soft);
+    padding: 24px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px;
+    position: sticky;
+    top: 0;
+    background: rgba(10,11,13,0.85);
+    backdrop-filter: blur(10px);
+    z-index: 10;
+  }
+
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .brand-icon {
+    width: 30px; height: 30px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--hot), #c2410c);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    color: #0a0b0d;
+    flex-shrink: 0;
+  }
+  .brand-title { font-family: 'Space Grotesk', sans-serif; font-size: 17px; font-weight: 600; }
+  .brand-title span { color: var(--text-dim); font-weight: 500; }
+
+  #backBtn {
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: var(--text);
+    padding: 9px 16px;
+    border-radius: 9px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  #backBtn:hover { border-color: var(--teal); background: var(--panel-2); }
+
+  main { max-width: 1000px; margin: 0 auto; padding: 40px 40px 100px; }
+
+  #loadingState {
+    text-align: center;
+    padding: 100px 20px;
+    color: var(--text-faint);
+  }
+  .loader-ring {
+    width: 22px; height: 22px;
+    border: 2px solid var(--border);
+    border-top-color: var(--teal);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin: 0 auto 16px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  #content { display: none; }
+
+  /* ---------- Profile header card ---------- */
+  .profile-card {
+    background: var(--panel);
+    border: 1px solid var(--border-soft);
+    border-radius: 16px;
+    padding: 32px;
+    margin-bottom: 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 24px;
+  }
+
+  .profile-left { display: flex; gap: 20px; align-items: flex-start; }
+
+  .avatar {
+    width: 56px; height: 56px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--teal), #2a8f7d);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+    color: #0a0b0d;
+    flex-shrink: 0;
+  }
+
+  .profile-name {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 26px;
+    font-weight: 600;
+    margin: 0 0 4px 0;
+  }
+  .profile-email { color: var(--text-faint); font-size: 14px; margin-bottom: 14px; }
+
+  .meta-row { display: flex; flex-wrap: wrap; gap: 18px; font-size: 13.5px; }
+  .meta-item { display: flex; align-items: center; gap: 7px; color: var(--text-dim); }
+  .meta-item .meta-label { color: var(--text-faint); }
+
+  .profile-right { text-align: right; min-width: 160px; }
+  .score-big {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 42px;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .score-sub { font-size: 12px; color: var(--text-faint); margin-top: 4px; margin-bottom: 10px; }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .badge .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .badge.hot { background: var(--hot-glow); color: var(--hot); }
+  .badge.hot .dot { background: var(--hot); }
+  .badge.warm { background: rgba(255,182,72,0.14); color: var(--warm); }
+  .badge.warm .dot { background: var(--warm); }
+  .badge.cold { background: rgba(91,157,255,0.12); color: var(--cold); }
+  .badge.cold .dot { background: var(--cold); }
+  .badge.unknown { background: rgba(255,255,255,0.05); color: var(--text-faint); }
+  .badge.unknown .dot { background: var(--text-faint); }
+
+  .risk-banner {
+    margin-top: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--risk);
+    font-size: 12.5px;
+    font-weight: 600;
+  }
+
+  /* ---------- Grid of two columns ---------- */
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border-soft);
+    border-radius: 16px;
+    padding: 26px;
+  }
+
+  .panel-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin-bottom: 16px;
+  }
+
+  .upcoming-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--teal);
+    animation: pulse 2s infinite;
+  }
+
+  .meeting-summary-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 17px;
+    font-weight: 600;
+    margin: 0 0 6px 0;
+  }
+  .meeting-summary-date {
+    font-size: 12.5px;
+    color: var(--text-faint);
+    margin-bottom: 16px;
+  }
+  .meeting-summary-time {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--teal);
+  }
+
+  .meet-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 16px;
+    padding: 9px 16px;
+    border-radius: 9px;
+    background: var(--teal-glow);
+    color: var(--teal);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .meet-link:hover { background: rgba(79,232,201,0.22); }
+
+  .notes-body {
+    font-size: 13.5px;
+    line-height: 1.65;
+    color: var(--text-dim);
+    white-space: pre-wrap;
+    max-height: 360px;
+    overflow-y: auto;
+    padding-right: 6px;
+  }
+  .notes-body::-webkit-scrollbar { width: 6px; }
+  .notes-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  .empty-mini {
+    color: var(--text-faint);
+    font-size: 13.5px;
+    padding: 20px 0;
+    text-align: center;
+  }
+
+  @media (max-width: 760px) {
+    .detail-grid { grid-template-columns: 1fr; }
+    header.top { padding: 18px 20px; }
+    main { padding: 28px 20px 70px; }
+    .profile-right { text-align: left; }
+  }
+</style>
+</head>
+<body>
+
+  <header class="top">
+    <div class="brand">
+      <div class="brand-icon">D</div>
+      <div class="brand-title">DealMind <span>Pipeline</span></div>
+    </div>
+    <a href="index.html" id="backBtn">← Back to pipeline</a>
+  </header>
+
+  <main>
+    <div id="loadingState">
+      <div class="loader-ring"></div>
+      Loading contact…
+    </div>
+
+    <div id="content">
+      <div class="profile-card">
+        <div class="profile-left">
+          <div class="avatar" id="avatarInitials">?</div>
+          <div>
+            <h1 class="profile-name" id="contactName">—</h1>
+            <div class="profile-email" id="contactEmail">—</div>
+            <div class="meta-row">
+              <div class="meta-item"><span class="meta-label">Company</span> <span id="contactCompany">—</span></div>
+              <div class="meta-item"><span class="meta-label">Title</span> <span id="contactTitle">—</span></div>
+              <div class="meta-item"><span class="meta-label">Phone</span> <span id="contactPhone">—</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="profile-right">
+          <div class="score-big" id="scoreBig">—</div>
+          <div class="score-sub">Lead score</div>
+          <div id="categoryBadgeWrap"></div>
+          <div id="riskBannerWrap"></div>
+        </div>
+      </div>
+
+      <div class="detail-grid">
+        <div class="panel">
+          <div class="panel-eyebrow"><span class="upcoming-dot"></span> Upcoming meeting</div>
+          <div id="upcomingMeetingBody">
+            <div class="empty-mini">No upcoming meeting scheduled.</div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-eyebrow">Last meeting summary</div>
+          <div id="notesBody">
+            <div class="empty-mini">No meeting notes yet.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+<script>
+  const BACKEND_URL = "https://dealmind-backend.onrender.com";
+
+  function getPassword() {
+    // Reuses the password from sessionStorage if the user came from index.html
+    // in the same session; otherwise prompts once.
+    let pw = sessionStorage.getItem('dealmind_pw');
+    return pw;
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function categoryClass(cat) {
+    if (!cat) return 'unknown';
+    const c = cat.toLowerCase();
+    if (c === 'hot') return 'hot';
+    if (c === 'warm') return 'warm';
+    if (c === 'cold') return 'cold';
+    return 'unknown';
+  }
+
+  function scoreColor(score) {
+    if (score === null || score === undefined) return 'var(--text-faint)';
+    if (score >= 80) return 'var(--hot)';
+    if (score >= 50) return 'var(--warm)';
+    return 'var(--cold)';
+  }
+
+  function formatDateTime(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    return d.toLocaleString(undefined, {
+      weekday: 'short', month: 'short', day: 'numeric',
+      hour: 'numeric', minute: '2-digit'
+    });
+  }
+
+  async function loadContact() {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
+
+    if (!id) {
+      document.getElementById('loadingState').innerHTML = 'No contact specified.';
+      return;
+    }
+
+    let password = getPassword();
+    if (!password) {
+      password = prompt('Enter dashboard password:');
+      if (password) sessionStorage.setItem('dealmind_pw', password);
+    }
+
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/contacts/${encodeURIComponent(id)}`, {
+        headers: { 'x-dashboard-password': password || '' }
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        document.getElementById('loadingState').innerHTML =
+          'Error: ' + escapeHtml(data.error || 'unknown error');
+        return;
+      }
+
+      renderContact(data);
+      document.getElementById('loadingState').style.display = 'none';
+      document.getElementById('content').style.display = 'block';
+    } catch (err) {
+      document.getElementById('loadingState').innerHTML = "Couldn't reach the backend.";
+    }
+  }
+
+  function renderContact(c) {
+    const fullName = `${c.firstName || ''} ${c.lastName || ''}`.trim() || '(no name)';
+    document.getElementById('contactName').textContent = fullName;
+    document.getElementById('contactEmail').textContent = c.email || '—';
+    document.getElementById('contactCompany').textContent = c.company || '—';
+    document.getElementById('contactTitle').textContent = c.jobTitle || '—';
+    document.getElementById('contactPhone').textContent = c.phone || '—';
+
+    const initials = ((c.firstName || '').charAt(0) + (c.lastName || '').charAt(0)).toUpperCase()
+      || (c.email || '?').charAt(0).toUpperCase();
+    document.getElementById('avatarInitials').textContent = initials;
+
+    const score = c.leadScore !== null && c.leadScore !== undefined ? c.leadScore : null;
+    document.getElementById('scoreBig').textContent = score !== null ? score : '—';
+    document.getElementById('scoreBig').style.color = scoreColor(score);
+
+    const catClass = categoryClass(c.leadCategory);
+    const catLabel = c.leadCategory || 'Unscored';
+    document.getElementById('categoryBadgeWrap').innerHTML =
+      `<span class="badge ${catClass}"><span class="dot"></span>${escapeHtml(catLabel)}</span>`;
+
+    document.getElementById('riskBannerWrap').innerHTML = c.atRisk
+      ? '<div class="risk-banner">⚠ At risk client</div>'
+      : '';
+
+    // Upcoming meeting
+    const meetingBody = document.getElementById('upcomingMeetingBody');
+    if (c.upcomingMeeting) {
+      const m = c.upcomingMeeting;
+      meetingBody.innerHTML = `
+        <div class="meeting-summary-title">${escapeHtml(m.summary || 'Follow-up meeting')}</div>
+        <div class="meeting-summary-date">${formatDateTime(m.start)}</div>
+        <div class="meeting-summary-time">${escapeHtml(m.description || 'Booked automatically by DealMind AI.')}</div>
+        ${m.meetLink ? `<a class="meet-link" href="${escapeHtml(m.meetLink)}" target="_blank">📹 Join Google Meet</a>` : ''}
+      `;
+    } else {
+      meetingBody.innerHTML = '<div class="empty-mini">No upcoming meeting scheduled.</div>';
+    }
+
+    // Notes / last meeting summary
+    const notesBody = document.getElementById('notesBody');
+    if (c.notes && c.notes.length > 0) {
+      const latest = c.notes[0];
+      notesBody.innerHTML = `<div class="notes-body">${escapeHtml(latest.body).replace(/\n/g, '<br>')}</div>`;
+    } else {
+      notesBody.innerHTML = '<div class="empty-mini">No meeting notes yet.</div>';
+    }
+  }
+
+  loadContact();
+</script>
+</body>
+</html>
